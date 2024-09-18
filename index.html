@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Traffic Signal Test</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  </head>
+  <body>
+    <h2>Traffic Signal Test</h2>
+    <div class="signal-container">
+      <div class="signal" id="signalA">
+        A
+      </div>
+      <div class="signal" id="signalB">
+        B
+      </div>
+      <div class="signal" id="signalC">
+        C
+      </div>
+      <div class="signal" id="signalD">
+        D
+      </div>
+    </div>
+
+    <div class="sequence-inputs">
+      <div>
+        <!-- <label for="seqA">A: </label> -->
+        <input type="number" id="seqA">
+      </div>
+      <div>
+        <!-- <label for="seqB">B: </label> -->
+        <input type="number" id="seqB">
+      </div>
+      <div>
+        <!-- <label for="seqC">C: </label> -->
+        <input type="number" id="seqC">
+      </div>
+      <div>
+        <!-- <label for="seqD">D: </label> -->
+        <input type="number" id="seqD">
+      </div>
+    </div>
+
+    <div class="input-section">
+      <div class="mb-2">
+        <label for="greenInterval">Green Light Intervals (in seconds): </label>
+        <input type="number" id="greenInterval">
+      </div>
+      <div class="mb-2">
+        <label for="yellowInterval">Yellow Light Intervals (in seconds): </label>
+        <input type="number" id="yellowInterval">
+      </div>
+    </div>
+
+    <div class="button-container">
+      <button id="startBtn">Start</button>
+      <button id="stopBtn">Stop</button>
+    </div>
+
+    <script>
+      let intervalId;
+
+      function resetSignals() {
+        $('.signal').css('background-color','gray');
+      }
+
+      function setSignal(signal,color) {
+        $('#signal' + signal).css('background-color',color);
+      }
+
+      function startSequence() {
+        if(intervalId) {
+          clearInterval(intervalId);
+        }
+
+        let sequence = [];
+        const seqA = $('#seqA').val();
+        const seqB = $('#seqB').val();
+        const seqC = $('#seqC').val();
+        const seqD = $('#seqD').val();
+
+        const signals = [
+                {id: 'A', value: seqA},
+                {id: 'B', value: seqB},
+                {id: 'C', value: seqC},
+                {id: 'D', value: seqD},
+        ];
+
+        signals.filter(signal => signal.value).sort((a, b) => a.value - b.value).forEach(signal => sequence.push(signal.id));
+
+        const greenInterval = parseInt($('#greenInterval').val()) * 1000;
+        const yellowInterval = parseInt($('#yellowInterval').val()) * 1000;
+
+        if(sequence.length === 0 || isNaN(greenInterval) || isNaN(yellowInterval)) {
+          alert('Please provide valid sequence and intervals in seconds.');
+          return;
+        }
+
+        let i = 0;
+        intervalId = setInterval(function() {
+          resetSignals();
+          let currentSignal = sequence[i % sequence.length];
+
+          setSignal(currentSignal, 'green');
+
+          setTimeout(function() {
+            setSignal(currentSignal, 'yellow');
+          }, greenInterval);
+
+          i++;
+
+        }, greenInterval + yellowInterval);
+
+        
+      }
+
+      $('#startBtn').click(function() {
+        startSequence();
+      });
+
+      $('#stopBtn').click(function() {
+        if(intervalId) {
+          clearInterval(intervalId);
+          resetSignals();
+        }
+      });
+    </script>
+  </body>
+</html>
